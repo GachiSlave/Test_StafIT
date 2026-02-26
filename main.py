@@ -3,7 +3,8 @@ import csv
 import tabulate
 
 
-def read_csv(dataframe, filename, encoding="utf-8"):
+# Функция для чтения файла и упаковки его в удобный вид для обработки
+def read_csv(dataframe: dict, filename: str, encoding="utf-8") -> dict:
     with open(filename, "r", encoding=encoding) as file:
         reader = csv.DictReader(file)
         if not dataframe:
@@ -21,8 +22,8 @@ def read_csv(dataframe, filename, encoding="utf-8"):
             index += 1
     return dataframe
 
-
-def group_by(dataframe, group_column):
+# Функция для группировки данных по уникальным значениям
+def group_by(dataframe: dict, group_column: str) -> dict:
     group_by_dic = {}
     valid_keys = list(dataframe.keys())[1:]
     valid_keys.remove(group_column)
@@ -33,8 +34,8 @@ def group_by(dataframe, group_column):
             group_by_dic[dataframe[group_column][i]][key].append(dataframe[key][i])
     return group_by_dic
 
-
-def average(group_by_dataframe, group_column, column):
+# Функция считающая среднее по колонке
+def average(group_by_dataframe: dict, group_column: str, column: str) -> dict:
     # index = 0
     # dataframe = {'index':[], group_column:[], column:[]}
     dataframe = {group_column: [], column: []}
@@ -48,8 +49,8 @@ def average(group_by_dataframe, group_column, column):
         # index+=1
     return dataframe
 
-
-def sort_by(dataframe, column, ascending=False):
+# Функция возвращающая отсортированный словарь (dataframe)
+def sort_by(dataframe: dict, column: str, ascending=False) -> dict:
     temp_list = []
     col_num = 0
     tmp_dataframe = {x: [] for x in dataframe.keys()}
@@ -66,8 +67,8 @@ def sort_by(dataframe, column, ascending=False):
             tmp_dataframe[col].append(value)
     return tmp_dataframe
 
-
-def average_report(group_column, filenames, report_type):
+# Функция возвращающая отчёт о средних по категориям
+def average_report(group_column: str, filenames: str, report_type: str) -> dict:
     dataframe = {}
     for file in filenames:
         dataframe = read_csv(dataframe=dataframe, filename=file)
@@ -81,24 +82,24 @@ def average_report(group_column, filenames, report_type):
     return average_df
 
 
-parser = argparse.ArgumentParser(prog="report", description="Печатает отчёт в консоль")
-
-parser.add_argument(
-    "-f",
-    "--files",
-    nargs="*",
-    help="Укажите пути до файлов через пробел, пример: --files ./foo.csv ./bar/bar.csv",
-)
-parser.add_argument(
-    "-r",
-    "--report",
-    help="Укажите тип отчёта и колонку через тире, пример: --report averag-gdp или --report average-year",
-)
-
-args = parser.parse_args()
-
-
 def main():
+    parser = argparse.ArgumentParser(
+        prog="report", description="Печатает отчёт в консоль"
+    )
+
+    parser.add_argument(
+        "-f",
+        "--files",
+        nargs="*",
+        help="Укажите пути до файлов через пробел, пример: --files ./foo.csv ./bar/bar.csv",
+    )
+    parser.add_argument(
+        "-r",
+        "--report",
+        help="Укажите тип отчёта и колонку через тире, пример: --report averag-gdp или --report average-year",
+    )
+
+    args = parser.parse_args()
     print(
         tabulate.tabulate(
             average_report("country", args.files, args.report),
